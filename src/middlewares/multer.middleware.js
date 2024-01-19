@@ -7,6 +7,7 @@ const storage = multer.diskStorage({
     filename: function (req, file, cb) {
       
       cb(null, file.originalname)
+      // Better to use other name cuz user can have same name for different files
     }
   })
   

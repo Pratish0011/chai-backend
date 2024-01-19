@@ -16,6 +16,10 @@ const generateAccessAndRefereshTokens = async(userId) =>{
         user.refreshToken = refreshToken
         await user.save({ validateBeforeSave: false })
 
+        // When we use user.save() the validation is done 
+        // (eg: Password is required)
+        // To avoid that we use { validateBeforeSave: false }
+
         return {accessToken, refreshToken}
 
 
@@ -127,6 +131,9 @@ const loginUser = asyncHandler(async (req, res) =>{
         throw new ApiError(404, "User does not exist")
     }
 
+    // mongodb methods can only be used in data 
+    // (eg: after getting user from db)
+
    const isPasswordValid = await user.isPasswordCorrect(password)
 
    if (!isPasswordValid) {
@@ -138,7 +145,7 @@ const loginUser = asyncHandler(async (req, res) =>{
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
 
     const options = {
-        httpOnly: true,
+        httpOnly: true,   // Can only modified by server
         secure: true
     }
 
@@ -184,11 +191,13 @@ const logoutUser = asyncHandler(async(req, res) => {
 })
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
+    // In mbl app there is no cookies so we need to send token in headers
+    
     const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
 
     if (!incomingRefreshToken) {
         throw new ApiError(401, "unauthorized request")
-    }
+    } 
 
     try {
         const decodedToken = jwt.verify(
@@ -287,6 +296,10 @@ const updateAccountDetails = asyncHandler(async(req, res) => {
 });
 
 const updateUserAvatar = asyncHandler(async(req, res) => {
+
+    // we are using req.file cuz we are only taking the field avatar 
+    // In registerUser we use req.files cuz we were taking files from 2 fields
+      
     const avatarLocalPath = req.file?.path
 
     if (!avatarLocalPath) {
@@ -400,7 +413,7 @@ const getUserChannelProfile = asyncHandler(async(req, res) => {
                 }
             }
         },
-        {
+        {    // What fields to send
             $project: {
                 fullName: 1,
                 username: 1,
@@ -429,6 +442,8 @@ const getUserChannelProfile = asyncHandler(async(req, res) => {
 const getWatchHistory = asyncHandler(async(req, res) => {
     const user = await User.aggregate([
         {
+
+            // We are making mongoose object Id
             $match: {
                 _id: new mongoose.Types.ObjectId(req.user._id)
             }
@@ -459,6 +474,7 @@ const getWatchHistory = asyncHandler(async(req, res) => {
                     },
                     {
                         $addFields:{
+                            // Getting first element from array
                             owner:{
                                 $first: "$owner"
                             }

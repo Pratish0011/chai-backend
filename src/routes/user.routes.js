@@ -19,9 +19,10 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 const router = Router()
 
 router.route("/register").post(
-    upload.fields([
+    upload.fields([     // we are using fields cuz we 
+                     // are  accepting files from 2 fields
         {
-            name: "avatar",
+            name: "avatar",    // In front end we have to set     the   name 'avatar'
             maxCount: 1
         }, 
         {

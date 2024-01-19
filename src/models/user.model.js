@@ -52,6 +52,10 @@ const userSchema = new Schema(
     }
 )
 
+
+// Cannot use arrow func here cuz we have to use "this" keyword
+
+
 userSchema.pre("save", async function (next) {
     if(!this.isModified("password")) return next();
 
@@ -59,9 +63,15 @@ userSchema.pre("save", async function (next) {
     next()
 })
 
+
+// Custom method 
 userSchema.methods.isPasswordCorrect = async function(password){
     return await bcrypt.compare(password, this.password)
+    // It return boolean
 }
+
+
+// JWT is bearer token
 
 userSchema.methods.generateAccessToken = function(){
     return jwt.sign(

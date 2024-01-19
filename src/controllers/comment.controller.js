@@ -9,6 +9,8 @@ const getVideoComments = asyncHandler(async (req, res) => {
     const {videoId} = req.params
     const {page = 1, limit = 10} = req.query
 
+    const videoComment = await Video
+
 })
 
 const addComment = asyncHandler(async (req, res) => {
