@@ -9,20 +9,113 @@ const getVideoComments = asyncHandler(async (req, res) => {
     const {videoId} = req.params
     const {page = 1, limit = 10} = req.query
 
-    const videoComment = await Video
 
 })
 
 const addComment = asyncHandler(async (req, res) => {
     // TODO: add a comment to a video
+    const {videoId} = req.params
+    const {userId} = req.user._id
+    const {content} = req.body
+
+    try {
+        
+        if(!videoId){
+            throw new ApiError(404, "Video not found")
+        }
+
+        if(!content || content.trim() === ""){
+            throw new ApiError(401, "Please write something")
+        }
+
+        const createComment = await Comment.create(
+            {
+                content: content,
+                video: videoId,
+                owner: userId
+            }
+        )
+
+        res.status(200).json(
+            new ApiResponse(200, createComment, "Comment added successfully")
+        )
+        
+    } catch (error) {
+        throw new ApiError(
+            new ApiError(500, "Internal Server Error")
+        )
+    }
+
 })
 
 const updateComment = asyncHandler(async (req, res) => {
     // TODO: update a comment
+    const {commentId} = req.params
+    const userId = req.user._id 
+    const {content} = req.body
+
+    try {
+
+        if(!content || content.trim() === ""){
+            throw new ApiError(401, "Please write something")
+        }
+
+        const comment = await Comment.findOne(
+            {
+                _id: commentId,
+                owner: userId
+            }
+        )
+
+        if(!comment){
+            throw new ApiError(404, "Comment not found")
+        }else{
+            const updateComment = await Comment.updateOne(
+                {
+                    _id: commentId,
+                     owner: userId
+                },
+                {
+                    $set:{
+                        content: content
+                    }
+                },
+                {
+                    new: true
+                }
+            )
+
+            return res.status(200).json(
+                new ApiResponse(200, updateComment, "Comment Updated Successfully")
+            )
+        }
+        
+    } catch (error) {
+        throw new ApiError(
+            new ApiError(500, "Internal Server Error")
+        )
+    }
 })
 
 const deleteComment = asyncHandler(async (req, res) => {
     // TODO: delete a comment
+    const {commentId} = req.params
+    const userId = req.user._id 
+    
+    try {
+        const comment = await Comment.findOne({
+            _id: commentId,
+            owner: userId
+        })
+
+        if(!comment){
+            throw new ApiError(404, "Comment not found")
+        }else{
+            const deletedComment = await Comment.findOneAndDelete
+        }
+    } catch (error) {
+        
+    }
 })
 
 export {
